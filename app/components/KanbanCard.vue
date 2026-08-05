@@ -10,6 +10,7 @@
     <p v-if="task.description" class="card-description">
       {{ task.description }}
     </p>
+    <p v-if="task.priority" class="card-priority">{{ task.priority }}</p>
     <button
       class="card-delete"
       type="button"
@@ -83,6 +84,14 @@ function onDragStart(event: DragEvent) {
   font-size: 0.8rem;
   color: var(--text-muted);
   margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.card-priority {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
   white-space: pre-wrap;
   word-break: break-word;
 }

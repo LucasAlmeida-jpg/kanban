@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal">
-      <h3>{{ task ? 'Edit task' : 'New task' }}</h3>
+      <h3>{{ task ? "Edit task" : "New task" }}</h3>
 
       <label class="field">
         <span>Title</span>
@@ -11,7 +11,7 @@
           type="text"
           placeholder="Task title"
           @keyup.enter="save"
-        >
+        />
       </label>
 
       <label class="field">
@@ -23,38 +23,64 @@
         />
       </label>
 
+   <label class="field">
+      <span>Priority</span>
+      <select v-model="priority">
+        <option v-for="t in priorityOptions" :key="t" :value="t">{{ t }}</option>
+      </select>
+    </label>
+
       <div class="modal-actions">
-        <button type="button" class="secondary" @click="$emit('close')">Cancel</button>
-        <button type="button" class="primary" :disabled="!title.trim()" @click="save">Save</button>
+        <button type="button" class="secondary" @click="$emit('close')">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="primary"
+          :disabled="!title.trim()"
+          @click="save"
+        >
+          Save
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Task, TaskInput } from "~/types/board";
+import type { Task, TaskInput, Priority } from "~/types/board";
 
-const props = withDefaults(defineProps<{
-  task?: Task | null
-}>(), {
-  task: null
-})
+const priorityOptions: Priority[] = ["low", "medium", "high"];
+
+const props = withDefaults(
+  defineProps<{
+    task?: Task | null;
+  }>(),
+  {
+    task: null,
+  },
+);
+const priority = ref<Priority>(props.task?.priority ?? "medium");
 const emit = defineEmits<{
-  save: [TaskInput]
-  close: []
-}>()
+  save: [TaskInput];
+  close: [];
+}>();
 
-const title = ref(props.task?.title ?? '')
-const description = ref(props.task?.description ?? '')
-const titleInput = ref<HTMLInputElement | null>(null)
+const title = ref(props.task?.title ?? "");
+const description = ref(props.task?.description ?? "");
+const titleInput = ref<HTMLInputElement | null>(null);
 
 onMounted(() => {
-  titleInput.value?.focus()
-})
+  titleInput.value?.focus();
+});
 
 function save() {
   if (!title.value.trim()) return;
-  emit('save', { title: title.value.trim(), description: description.value.trim() })
+  emit("save", {
+    title: title.value.trim(),
+    description: description.value.trim(),
+    priority: priority.value,
+  });
 }
 </script>
 
@@ -93,7 +119,8 @@ function save() {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   font: inherit;
   color: inherit;
   background: var(--input-bg);
