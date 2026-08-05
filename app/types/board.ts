@@ -2,6 +2,7 @@ export interface Task {
     id: string;
     title: string;
     description: string;
+    priority: Priority;
 }
 
 export interface Column {
@@ -20,5 +21,6 @@ export interface TaskArg {
     toColumnId: string; 
     toIndex?: number;
 }
-export type TaskInput = Pick<Task, "title" | "description">
+export type TaskInput = Pick<Task, "title" | "description" | "priority">
 export type TaskUpdate = Partial<TaskInput>
+export type Priority = 'low' | 'medium' | 'high'
