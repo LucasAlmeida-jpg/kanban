@@ -1,4 +1,4 @@
-import type { Board, TaskInput, TaskUpdate, TaskArg } from "~/types/board"
+import type { Board, TaskUpdate, TaskArg, TaskInput } from "~/types/board"
 
 const STORAGE_KEY = 'kanban-board'
 
@@ -13,22 +13,22 @@ function seedBoard(): Board {
         id: createId(),
         title: 'To Do',
         tasks: [
-          { id: createId(), title: 'Plan the sprint', description: 'Define goals and scope for the next sprint.' },
-          { id: createId(), title: 'Design database schema', description: '' }
+          { id: createId(), title: 'Plan the sprint', description: 'Define goals and scope for the next sprint.', priority: 'low' },
+          { id: createId(), title: 'Design database schema', description: '', priority: 'low' }
         ]
       },
       {
         id: createId(),
         title: 'In Progress',
         tasks: [
-          { id: createId(), title: 'Build authentication flow', description: 'Login, signup and password reset.' }
+          { id: createId(), title: 'Build authentication flow', description: 'Login, signup and password reset.', priority: 'low' }
         ]
       },
       {
         id: createId(),
         title: 'Done',
         tasks: [
-          { id: createId(), title: 'Set up project', description: 'Scaffold the Nuxt app.' }
+          { id: createId(), title: 'Set up project', description: 'Scaffold the Nuxt app.', priority: 'low' }
         ]
       }
     ]
@@ -77,7 +77,8 @@ export function useBoard() {
     column.tasks.push({
       id: createId(),
       title: task.title,
-      description: task.description || ''
+      description: task.description || '',
+      priority: task.priority,
     })
     persist()
   }
