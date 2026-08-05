@@ -1,10 +1,12 @@
+import type { Board, TaskInput, TaskUpdate, TaskArg } from "~/types/board"
+
 const STORAGE_KEY = 'kanban-board'
 
-function createId() {
+function createId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
-function seedBoard() {
+function seedBoard(): Board {
   return {
     columns: [
       {
@@ -34,7 +36,7 @@ function seedBoard() {
 }
 
 export function useBoard() {
-  const board = useState('kanban-board', () => seedBoard())
+  const board = useState<Board>('kanban-board', () => seedBoard())
 
   function persist() {
     if (import.meta.client) {
@@ -53,23 +55,23 @@ export function useBoard() {
     }
   }
 
-  function addColumn(title) {
+  function addColumn(title: string) {
     board.value.columns.push({ id: createId(), title, tasks: [] })
     persist()
   }
 
-  function removeColumn(columnId) {
+  function removeColumn(columnId: string) {
     board.value.columns = board.value.columns.filter(column => column.id !== columnId)
     persist()
   }
 
-  function renameColumn(columnId, title) {
+  function renameColumn(columnId: string, title: string) {
     const column = board.value.columns.find(column => column.id === columnId)
     if (column) column.title = title
     persist()
   }
 
-  function addTask(columnId, task) {
+  function addTask(columnId: string, task: TaskInput) {
     const column = board.value.columns.find(column => column.id === columnId)
     if (!column) return
     column.tasks.push({
@@ -80,7 +82,7 @@ export function useBoard() {
     persist()
   }
 
-  function updateTask(taskId, updates) {
+  function updateTask(taskId: string, updates: TaskUpdate) {
     for (const column of board.value.columns) {
       const task = column.tasks.find(task => task.id === taskId)
       if (task) {
@@ -91,14 +93,14 @@ export function useBoard() {
     persist()
   }
 
-  function removeTask(columnId, taskId) {
+  function removeTask(columnId: string, taskId: string) {
     const column = board.value.columns.find(column => column.id === columnId)
     if (!column) return
     column.tasks = column.tasks.filter(task => task.id !== taskId)
     persist()
   }
 
-  function moveTask({ taskId, fromColumnId, toColumnId, toIndex }) {
+  function moveTask({ taskId, fromColumnId, toColumnId, toIndex }: TaskArg) {
     const fromColumn = board.value.columns.find(column => column.id === fromColumnId)
     const toColumn = board.value.columns.find(column => column.id === toColumnId)
     if (!fromColumn || !toColumn) return
@@ -107,7 +109,7 @@ export function useBoard() {
     if (fromIndex === -1) return
 
     const [task] = fromColumn.tasks.splice(fromIndex, 1)
-
+    if (!task) return
     let insertIndex = toIndex ?? toColumn.tasks.length
     if (fromColumnId === toColumnId && fromIndex < insertIndex) {
       insertIndex -= 1

@@ -7,7 +7,9 @@
     @click="$emit('edit')"
   >
     <p class="card-title">{{ task.title }}</p>
-    <p v-if="task.description" class="card-description">{{ task.description }}</p>
+    <p v-if="task.description" class="card-description">
+      {{ task.description }}
+    </p>
     <button
       class="card-delete"
       type="button"
@@ -19,26 +21,30 @@
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  task: {
-    type: Object,
-    required: true
-  },
-  columnId: {
-    type: String,
-    required: true
-  }
-})
+<script setup lang="ts">
+import type { Task } from "~/types/board";
 
-defineEmits(['edit', 'delete', 'dragend'])
+const props = defineProps<{
+  task: Task;
+  columnId: string;
+}>();
 
-function onDragStart(event) {
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData('text/plain', JSON.stringify({
-    taskId: props.task.id,
-    fromColumnId: props.columnId
-  }))
+const emit = defineEmits<{
+  edit: []
+  delete: []
+  dragend: []
+}>()
+
+function onDragStart(event: DragEvent) {
+  if(!event.dataTransfer) return;
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData(
+    "text/plain",
+    JSON.stringify({
+      taskId: props.task.id,
+      fromColumnId: props.columnId,
+    }),
+  );
 }
 </script>
 
@@ -52,7 +58,9 @@ function onDragStart(event) {
   margin-bottom: 0.5rem;
   cursor: grab;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
 }
 
 .card:hover {

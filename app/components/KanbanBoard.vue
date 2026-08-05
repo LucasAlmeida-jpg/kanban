@@ -31,7 +31,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { Task, TaskInput } from "~/types/board";
 const {
   board,
   load,
@@ -50,8 +51,8 @@ onMounted(() => {
 
 const newColumnTitle = ref('')
 const dialogOpen = ref(false)
-const dialogTask = ref(null)
-const dialogColumnId = ref(null)
+const dialogTask = ref<Task | null>(null);
+const dialogColumnId = ref<string | null>(null);
 
 function createColumn() {
   const title = newColumnTitle.value.trim()
@@ -60,7 +61,7 @@ function createColumn() {
   newColumnTitle.value = ''
 }
 
-function confirmRemoveColumn(columnId) {
+function confirmRemoveColumn(columnId: string) {
   const column = board.value.columns.find(column => column.id === columnId)
   if (!column) return
   if (column.tasks.length && !confirm(`Delete column "${column.title}" and its ${column.tasks.length} task(s)?`)) {
@@ -69,22 +70,24 @@ function confirmRemoveColumn(columnId) {
   removeColumn(columnId)
 }
 
-function openNewTaskDialog(columnId) {
+function openNewTaskDialog(columnId: string) {
   dialogColumnId.value = columnId
   dialogTask.value = null
   dialogOpen.value = true
 }
 
-function openEditTaskDialog(columnId, task) {
+function openEditTaskDialog(columnId:string, task: Task) {
   dialogColumnId.value = columnId
   dialogTask.value = task
   dialogOpen.value = true
 }
 
-function saveTask(taskData) {
+function saveTask(taskData: TaskInput) {
+  console.log(taskData)
   if (dialogTask.value) {
     updateTask(dialogTask.value.id, taskData)
   } else {
+    if (!dialogColumnId.value) return
     addTask(dialogColumnId.value, taskData)
   }
   dialogOpen.value = false

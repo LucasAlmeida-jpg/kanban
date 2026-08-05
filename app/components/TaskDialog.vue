@@ -31,26 +31,29 @@
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  task: {
-    type: Object,
-    default: null
-  }
-})
+<script setup lang="ts">
+import type { Task, TaskInput } from "~/types/board";
 
-const emit = defineEmits(['save', 'close'])
+const props = withDefaults(defineProps<{
+  task?: Task | null
+}>(), {
+  task: null
+})
+const emit = defineEmits<{
+  save: [TaskInput]
+  close: []
+}>()
 
 const title = ref(props.task?.title ?? '')
 const description = ref(props.task?.description ?? '')
-const titleInput = ref(null)
+const titleInput = ref<HTMLInputElement | null>(null)
 
 onMounted(() => {
   titleInput.value?.focus()
 })
 
 function save() {
-  if (!title.value.trim()) return
+  if (!title.value.trim()) return;
   emit('save', { title: title.value.trim(), description: description.value.trim() })
 }
 </script>

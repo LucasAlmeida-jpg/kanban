@@ -9,8 +9,10 @@
         @blur="saveTitle"
         @keyup.enter="saveTitle"
         @keyup.esc="cancelTitle"
-      >
-      <h2 v-else class="column-title" @dblclick="startEditTitle">{{ column.title }}</h2>
+      />
+      <h2 v-else class="column-title" @dblclick="startEditTitle">
+        {{ column.title }}
+      </h2>
       <span class="column-count">{{ column.tasks.length }}</span>
       <button
         class="column-remove"
@@ -29,7 +31,10 @@
       @dragleave="onDragLeaveColumn"
     >
       <template v-for="(task, index) in column.tasks" :key="task.id">
-        <div class="drop-indicator" :class="{ visible: dragOverIndex === index }" />
+        <div
+          class="drop-indicator"
+          :class="{ visible: dragOverIndex === index }"
+        />
         <div @dragover.prevent="onDragOverCard($event, index)">
           <KanbanCard
             :task="task"
@@ -40,74 +45,98 @@
           />
         </div>
       </template>
-      <div class="drop-indicator" :class="{ visible: dragOverIndex === column.tasks.length }" />
+      <div
+        class="drop-indicator"
+        :class="{ visible: dragOverIndex === column.tasks.length }"
+      />
 
       <p v-if="!column.tasks.length" class="column-empty">No tasks yet</p>
     </div>
 
-    <button class="add-task-button" type="button" @click="$emit('add-task', column.id)">
+    <button
+      class="add-task-button"
+      type="button"
+      @click="$emit('add-task', column.id)"
+    >
       + Add task
     </button>
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  column: {
-    type: Object,
-    required: true
-  }
-})
+<script setup lang="ts">
+import type { Column, Task, TaskArg } from "~/types/board";
 
-const emit = defineEmits(['add-task', 'edit-task', 'delete-task', 'remove-column', 'move-task', 'rename-column'])
+const props = defineProps<{
+  column: Column;
+}>();
+const emit = defineEmits<{
+  "add-task": [columnId: string];
+  "edit-task": [columnId: string, task: Task];
+  "delete-task": [columnId: string, taskId: string]
+  "remove-column": [columnId: string];
+  "move-task": [payload: TaskArg];
+  "rename-column": [columnId: string, title: string]
+}>();
 
-const dragOverIndex = ref(null)
-const editingTitle = ref(false)
-const titleDraft = ref('')
-const titleInput = ref(null)
+const dragOverIndex = ref<number | null>(null);
+const editingTitle = ref(false);
+const titleDraft = ref("");
+const titleInput = ref<HTMLInputElement | null>(null);
 
-function onDragOverCard(event, index) {
-  const bounds = event.currentTarget.getBoundingClientRect()
-  const isAfter = event.clientY - bounds.top > bounds.height / 2
-  dragOverIndex.value = isAfter ? index + 1 : index
+function onDragOverCard(event: DragEvent, index: number) {
+  if (!(event.currentTarget instanceof HTMLElement)) return;
+  const bounds = event.currentTarget.getBoundingClientRect();
+  const isAfter = event.clientY - bounds.top > bounds.height / 2;
+  dragOverIndex.value = isAfter ? index + 1 : index;
 }
 
 function onDragOverColumn() {
   if (dragOverIndex.value === null) {
-    dragOverIndex.value = props.column.tasks.length
+    dragOverIndex.value = props.column.tasks.length;
   }
 }
 
-function onDragLeaveColumn(event) {
-  if (!event.currentTarget.contains(event.relatedTarget)) {
-    dragOverIndex.value = null
+function onDragLeaveColumn(event: DragEvent) {
+  if (!(event.currentTarget instanceof HTMLElement)) return;
+  if (
+    event.relatedTarget instanceof Node &&
+    event.currentTarget.contains(event.relatedTarget)
+  ) {
+    return;
   }
+  dragOverIndex.value = null;
 }
 
-function onDropColumn(event) {
-  const raw = event.dataTransfer.getData('text/plain')
-  if (!raw) return
-  const { taskId, fromColumnId } = JSON.parse(raw)
-  const toIndex = dragOverIndex.value ?? props.column.tasks.length
-  emit('move-task', { taskId, fromColumnId, toColumnId: props.column.id, toIndex })
-  dragOverIndex.value = null
+function onDropColumn(event: DragEvent) {
+  if (!event.dataTransfer) return;
+  const raw = event.dataTransfer.getData("text/plain");
+  if (!raw) return;
+  const { taskId, fromColumnId } = JSON.parse(raw);
+  const toIndex = dragOverIndex.value ?? props.column.tasks.length;
+  emit("move-task", {
+    taskId,
+    fromColumnId,
+    toColumnId: props.column.id,
+    toIndex,
+  });
+  dragOverIndex.value = null;
 }
 
 function startEditTitle() {
-  titleDraft.value = props.column.title
-  editingTitle.value = true
-  nextTick(() => titleInput.value?.focus())
+  titleDraft.value = props.column.title;
+  editingTitle.value = true;
+  nextTick(() => titleInput.value?.focus());
 }
 
 function saveTitle() {
   if (titleDraft.value.trim()) {
-    emit('rename-column', props.column.id, titleDraft.value.trim())
+    emit("rename-column", props.column.id, titleDraft.value.trim());
   }
-  editingTitle.value = false
+  editingTitle.value = false;
 }
 
 function cancelTitle() {
-  editingTitle.value = false
+  editingTitle.value = false;
 }
 </script>
 
@@ -193,7 +222,10 @@ function cancelTitle() {
   background: var(--accent);
   margin: 0;
   opacity: 0;
-  transition: height 0.12s ease, opacity 0.12s ease, margin 0.12s ease;
+  transition:
+    height 0.12s ease,
+    opacity 0.12s ease,
+    margin 0.12s ease;
 }
 
 .drop-indicator.visible {
