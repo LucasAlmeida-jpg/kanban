@@ -9,7 +9,7 @@
     </main>
   </div>
 </template>
-
+<script setup lang="ts"></script>
 <style scoped>
 .app {
   display: flex;
